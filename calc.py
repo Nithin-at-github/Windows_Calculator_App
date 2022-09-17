@@ -15,7 +15,7 @@ DEFAULT_FONT_STYLE = ('Arial', 20)
 class Calculator:
     def __init__(self):
         self.window = tk.Tk()
-        self.window.geometry('375x667')
+        self.window.geometry('320x500')
         self.window.resizable(0, 0)
         self.window.title("Calculator")
 
@@ -47,6 +47,8 @@ class Calculator:
     def create_special_buttons(self):
         self.create_clear_button()
         self.create_equals_button()
+        self.create_square_button()
+        self.create_sqrt_button()
 
     def create_display_label(self):
         total_label = tk.Label(self.display_frame, text=self.total_expressions, anchor=tk.E,
@@ -105,15 +107,37 @@ class Calculator:
     def create_clear_button(self):
         button = tk.Button(self.buttons_frame, text="C", bg=OFF_WHITE, fg=LABEL_COLOR,
                            font=DEFAULT_FONT_STYLE, borderwidth=0, command=self.clear)
-        button.grid(row=0, column=1, columnspan=3, sticky=tk.NSEW)
+        button.grid(row=0, column=1, sticky=tk.NSEW)
+
+    def square(self):
+        self.current_expressions = str(eval(f"{self.current_expressions}**2"))
+        self.update_label()
+
+    def create_square_button(self):
+        button = tk.Button(self.buttons_frame, text="x\u00b2", bg=OFF_WHITE, fg=LABEL_COLOR,
+                           font=DEFAULT_FONT_STYLE, borderwidth=0, command=self.square)
+        button.grid(row=0, column=2, sticky=tk.NSEW)
+
+    def sqrt(self):
+        self.current_expressions = str(eval(f"{self.current_expressions}**0.5"))
+        self.update_label()
+
+    def create_sqrt_button(self):
+        button = tk.Button(self.buttons_frame, text="\u221ax", bg=OFF_WHITE, fg=LABEL_COLOR,
+                           font=DEFAULT_FONT_STYLE, borderwidth=0, command=self.sqrt)
+        button.grid(row=0, column=3, sticky=tk.NSEW)
 
     def evaluvate(self):
         self.total_expressions += self.current_expressions
         self.update_total_label()
 
-        self.current_expressions = str(eval(self.total_expressions))
-        self.total_expressions = ""
-        self.update_label()
+        try:
+            self.current_expressions = str(eval(self.total_expressions))
+            self.total_expressions = ""
+        except Exception as e:
+            self.current_expressions = "Error"
+        finally:
+            self.update_label()
 
     def create_equals_button(self):
         button = tk.Button(self.buttons_frame, text="=", bg=LIGHT_BLUE, fg=LABEL_COLOR,
@@ -121,10 +145,13 @@ class Calculator:
         button.grid(row=4, column=3, columnspan=2, sticky=tk.NSEW)
 
     def update_total_label(self):
-        self.total_label.config(text=self.total_expressions)
+        expression = self.total_expressions
+        for operator, symbol in self.operations.items():
+            expression = expression.replace(operator, f"{symbol}")
+        self.total_label.config(text=expression)
 
     def update_label(self):
-        self.label.config(text=self.current_expressions)
+        self.label.config(text=self.current_expressions[:11])
 
     def run(self):
         self.window.mainloop()
