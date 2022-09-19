@@ -15,7 +15,7 @@ DEFAULT_FONT_STYLE = ('Arial', 20)
 class Calculator:
     def __init__(self):
         self.window = tk.Tk()
-        self.window.geometry('320x500')
+        self.window.geometry('350x500')
         self.window.resizable(0, 0)
         self.window.title("Calculator")
 
@@ -26,10 +26,10 @@ class Calculator:
         self.total_label, self.label = self.create_display_label()
 
         self.digits = {
-            7: (1, 1), 8: (1, 2), 9: (1, 3),
-            4: (2, 1), 5: (2, 2), 6: (2, 3),
-            1: (3, 1), 2: (3, 2), 3: (3, 3),
-            ".": (4, 1),  0: (4, 2),
+            7: (2, 1), 8: (2, 2), 9: (2, 3),
+            4: (3, 1), 5: (3, 2), 6: (3, 3),
+            1: (4, 1), 2: (4, 2), 3: (4, 3),
+            ".": (5, 3),  0: (5, 2),
         }
 
         self.operations = {"/": "\u00F7", "*": "\u00D7", "-": "-", "+": "+"}
@@ -47,6 +47,8 @@ class Calculator:
 
     def bind_keys(self):
         self.window.bind("<Return>", lambda event: self.evaluvate())
+        self.window.bind("%", lambda event: self.percentage())
+        self.window.bind("<BackSpace>", lambda event: self.backspace())
         for key in self.digits:
             self.window.bind(str(key), lambda event, digit=key: self.add_to_expression(digit))
 
@@ -55,9 +57,14 @@ class Calculator:
 
     def create_special_buttons(self):
         self.create_clear_button()
+        self.create_ce_button()
+        self.create_backspace_button()
         self.create_equals_button()
         self.create_square_button()
         self.create_sqrt_button()
+        self.create_reciprocal_button()
+        self.create_percentage_button()
+        self.create_plus_minus_button()
 
     def create_display_label(self):
         total_label = tk.Label(self.display_frame, text=self.total_expressions, anchor=tk.E,
@@ -91,6 +98,15 @@ class Calculator:
                                command=lambda x=digit: self.add_to_expression(x))
             button.grid(row=grid_value[0], column=grid_value[1], sticky=tk.NSEW)
 
+    def plus_minus(self):
+        self.current_expressions = str(eval(f"{self.current_expressions}*-1"))
+        self.update_label()
+
+    def create_plus_minus_button(self):
+        button = tk.Button(self.buttons_frame, text="\u00B1", bg=WHITE, fg=LABEL_COLOR,
+                           font=SMALL_FONT_STYLE, borderwidth=0, command=self.plus_minus)
+        button.grid(row=5, column=1, sticky=tk.NSEW)
+
     def append_operator(self, operator):
         self.current_expressions += operator
         self.total_expressions += self.current_expressions
@@ -99,13 +115,38 @@ class Calculator:
         self.update_label()
 
     def create_operator_buttons(self):
-        i = 0
+        i = 1
         for operator, symbol in self.operations.items():
             button = tk.Button(self.buttons_frame, text=symbol, bg=OFF_WHITE, fg=LABEL_COLOR,
                                font=DEFAULT_FONT_STYLE, borderwidth=0,
                                command=lambda x=operator: self.append_operator(x))
             button.grid(row=i, column=4, sticky=tk.NSEW)
             i += 1
+
+    def percentage(self):
+        expression = self.total_expressions
+        tot = float(expression[:-1])
+        operator = expression[-1:]
+        percent = float(eval(f"{self.current_expressions}*0.01"))
+        if operator == '*' or operator == '/':
+            self.current_expressions = str(percent)
+        else:
+            self.current_expressions = str("{:.2f}".format(percent * tot))
+        self.update_label()
+
+    def create_percentage_button(self):
+        button = tk.Button(self.buttons_frame, text="\u0025", bg=OFF_WHITE, fg=LABEL_COLOR,
+                           font=SMALL_FONT_STYLE, borderwidth=0, command=self.percentage)
+        button.grid(row=0, column=1, sticky=tk.NSEW)
+
+    def ce(self):
+        self.current_expressions = ""
+        self.update_label()
+
+    def create_ce_button(self):
+        button = tk.Button(self.buttons_frame, text="CE", bg=OFF_WHITE, fg=LABEL_COLOR,
+                           font=SMALL_FONT_STYLE, borderwidth=0, command=self.ce)
+        button.grid(row=0, column=2, sticky=tk.NSEW)
 
     def clear(self):
         self.current_expressions = ""
@@ -116,7 +157,25 @@ class Calculator:
     def create_clear_button(self):
         button = tk.Button(self.buttons_frame, text="C", bg=OFF_WHITE, fg=LABEL_COLOR,
                            font=DEFAULT_FONT_STYLE, borderwidth=0, command=self.clear)
-        button.grid(row=0, column=1, sticky=tk.NSEW)
+        button.grid(row=0, column=3, sticky=tk.NSEW)
+
+    def backspace(self):
+        self.current_expressions = self.current_expressions[:-1]
+        self.update_label()
+
+    def create_backspace_button(self):
+        button = tk.Button(self.buttons_frame, text="\u2190", bg=OFF_WHITE, fg=LABEL_COLOR,
+                           font=DEFAULT_FONT_STYLE, borderwidth=0, command=self.backspace)
+        button.grid(row=0, column=4, sticky=tk.NSEW)
+
+    def reciprocal(self):
+        self.current_expressions = str(eval(f"{self.current_expressions}**-1"))
+        self.update_label()
+
+    def create_reciprocal_button(self):
+        button = tk.Button(self.buttons_frame, text="\u215Fx", bg=OFF_WHITE, fg=LABEL_COLOR,
+                           font=DEFAULT_FONT_STYLE, borderwidth=0, command=self.reciprocal)
+        button.grid(row=1, column=1, sticky=tk.NSEW)
 
     def square(self):
         self.current_expressions = str(eval(f"{self.current_expressions}**2"))
@@ -125,7 +184,7 @@ class Calculator:
     def create_square_button(self):
         button = tk.Button(self.buttons_frame, text="x\u00b2", bg=OFF_WHITE, fg=LABEL_COLOR,
                            font=DEFAULT_FONT_STYLE, borderwidth=0, command=self.square)
-        button.grid(row=0, column=2, sticky=tk.NSEW)
+        button.grid(row=1, column=2, sticky=tk.NSEW)
 
     def sqrt(self):
         self.current_expressions = str(eval(f"{self.current_expressions}**0.5"))
@@ -134,7 +193,7 @@ class Calculator:
     def create_sqrt_button(self):
         button = tk.Button(self.buttons_frame, text="\u221ax", bg=OFF_WHITE, fg=LABEL_COLOR,
                            font=DEFAULT_FONT_STYLE, borderwidth=0, command=self.sqrt)
-        button.grid(row=0, column=3, sticky=tk.NSEW)
+        button.grid(row=1, column=3, sticky=tk.NSEW)
 
     def evaluvate(self):
         self.total_expressions += self.current_expressions
@@ -151,7 +210,7 @@ class Calculator:
     def create_equals_button(self):
         button = tk.Button(self.buttons_frame, text="=", bg=LIGHT_BLUE, fg=LABEL_COLOR,
                            font=DEFAULT_FONT_STYLE, borderwidth=0, command=self.evaluvate)
-        button.grid(row=4, column=3, columnspan=2, sticky=tk.NSEW)
+        button.grid(row=5, column=4, sticky=tk.NSEW)
 
     def update_total_label(self):
         expression = self.total_expressions
