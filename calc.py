@@ -12,6 +12,21 @@ DIGIT_FONT_STYLE = ('Arial', 24, 'bold')
 DEFAULT_FONT_STYLE = ('Arial', 20)
 
 
+class HoverButton(tk.Button):
+    def __init__(self, master, **kw):
+        tk.Button.__init__(self, master=master, **kw)
+        self.defaultBackground = self["bg"]
+        self.bind("<Enter>", self.on_enter)
+        self.bind("<Leave>", self.on_leave)
+
+    def on_enter(self, e):
+        # "#e8f7ff , #e0f4ff"
+        self['bg'] = "#e8f7ff"
+
+    def on_leave(self, e):
+        self['bg'] = self.defaultBackground
+
+
 class Calculator:
     def __init__(self):
         self.window = tk.Tk()
@@ -93,17 +108,21 @@ class Calculator:
 
     def create_digit_buttons(self):
         for digit, grid_value in self.digits.items():
-            button = tk.Button(self.buttons_frame, text=str(digit), bg=WHITE, fg=LABEL_COLOR,
+            button = HoverButton(self.buttons_frame, text=str(digit), bg=WHITE, fg=LABEL_COLOR,
                                font=DIGIT_FONT_STYLE, borderwidth=0,
                                command=lambda x=digit: self.add_to_expression(x))
             button.grid(row=grid_value[0], column=grid_value[1], sticky=tk.NSEW)
 
     def plus_minus(self):
-        self.current_expressions = str(eval(f"{self.current_expressions}*-1"))
-        self.update_label()
+        try:
+            self.current_expressions = str(eval(f"{self.current_expressions}*-1"))
+        except Exception as e:
+            self.current_expressions = ""
+        finally:
+            self.update_label()
 
     def create_plus_minus_button(self):
-        button = tk.Button(self.buttons_frame, text="\u00B1", bg=WHITE, fg=LABEL_COLOR,
+        button = HoverButton(self.buttons_frame, text="\u00B1", bg=WHITE, fg=LABEL_COLOR,
                            font=SMALL_FONT_STYLE, borderwidth=0, command=self.plus_minus)
         button.grid(row=5, column=1, sticky=tk.NSEW)
 
@@ -117,25 +136,29 @@ class Calculator:
     def create_operator_buttons(self):
         i = 1
         for operator, symbol in self.operations.items():
-            button = tk.Button(self.buttons_frame, text=symbol, bg=OFF_WHITE, fg=LABEL_COLOR,
+            button = HoverButton(self.buttons_frame, text=symbol, bg=OFF_WHITE, fg=LABEL_COLOR,
                                font=DEFAULT_FONT_STYLE, borderwidth=0,
                                command=lambda x=operator: self.append_operator(x))
             button.grid(row=i, column=4, sticky=tk.NSEW)
             i += 1
 
     def percentage(self):
-        expression = self.total_expressions
-        tot = float(expression[:-1])
-        operator = expression[-1:]
-        percent = float(eval(f"{self.current_expressions}*0.01"))
-        if operator == '*' or operator == '/':
-            self.current_expressions = str(percent)
-        else:
-            self.current_expressions = str("{:.2f}".format(percent * tot))
-        self.update_label()
+        try:
+            expression = self.total_expressions
+            tot = float(expression[:-1])
+            operator = expression[-1:]
+            percent = float(eval(f"{self.current_expressions}*0.01"))
+            if operator == '*' or operator == '/':
+                self.current_expressions = str(percent)
+            else:
+                self.current_expressions = str("{:.2f}".format(percent * tot))
+        except Exception as e:
+            self.current_expressions = ""
+        finally:
+            self.update_label()
 
     def create_percentage_button(self):
-        button = tk.Button(self.buttons_frame, text="\u0025", bg=OFF_WHITE, fg=LABEL_COLOR,
+        button = HoverButton(self.buttons_frame, text="\u0025", bg=OFF_WHITE, fg=LABEL_COLOR,
                            font=SMALL_FONT_STYLE, borderwidth=0, command=self.percentage)
         button.grid(row=0, column=1, sticky=tk.NSEW)
 
@@ -144,7 +167,7 @@ class Calculator:
         self.update_label()
 
     def create_ce_button(self):
-        button = tk.Button(self.buttons_frame, text="CE", bg=OFF_WHITE, fg=LABEL_COLOR,
+        button = HoverButton(self.buttons_frame, text="CE", bg=OFF_WHITE, fg=LABEL_COLOR,
                            font=SMALL_FONT_STYLE, borderwidth=0, command=self.ce)
         button.grid(row=0, column=2, sticky=tk.NSEW)
 
@@ -155,7 +178,7 @@ class Calculator:
         self.update_label()
 
     def create_clear_button(self):
-        button = tk.Button(self.buttons_frame, text="C", bg=OFF_WHITE, fg=LABEL_COLOR,
+        button = HoverButton(self.buttons_frame, text="C", bg=OFF_WHITE, fg=LABEL_COLOR,
                            font=DEFAULT_FONT_STYLE, borderwidth=0, command=self.clear)
         button.grid(row=0, column=3, sticky=tk.NSEW)
 
@@ -164,34 +187,46 @@ class Calculator:
         self.update_label()
 
     def create_backspace_button(self):
-        button = tk.Button(self.buttons_frame, text="\u2190", bg=OFF_WHITE, fg=LABEL_COLOR,
+        button = HoverButton(self.buttons_frame, text="\u2190", bg=OFF_WHITE, fg=LABEL_COLOR,
                            font=DEFAULT_FONT_STYLE, borderwidth=0, command=self.backspace)
         button.grid(row=0, column=4, sticky=tk.NSEW)
 
     def reciprocal(self):
-        self.current_expressions = str(eval(f"{self.current_expressions}**-1"))
-        self.update_label()
+        try:
+            self.current_expressions = str(eval(f"{self.current_expressions}**-1"))
+        except Exception as e:
+            self.current_expressions = ""
+        finally:
+            self.update_label()
 
     def create_reciprocal_button(self):
-        button = tk.Button(self.buttons_frame, text="\u215Fx", bg=OFF_WHITE, fg=LABEL_COLOR,
+        button = HoverButton(self.buttons_frame, text="\u215Fx", bg=OFF_WHITE, fg=LABEL_COLOR,
                            font=DEFAULT_FONT_STYLE, borderwidth=0, command=self.reciprocal)
         button.grid(row=1, column=1, sticky=tk.NSEW)
 
     def square(self):
-        self.current_expressions = str(eval(f"{self.current_expressions}**2"))
-        self.update_label()
+        try:
+            self.current_expressions = str(eval(f"{self.current_expressions}**2"))
+        except Exception as e:
+            self.current_expressions = ""
+        finally:
+            self.update_label()
 
     def create_square_button(self):
-        button = tk.Button(self.buttons_frame, text="x\u00b2", bg=OFF_WHITE, fg=LABEL_COLOR,
+        button = HoverButton(self.buttons_frame, text="x\u00b2", bg=OFF_WHITE, fg=LABEL_COLOR,
                            font=DEFAULT_FONT_STYLE, borderwidth=0, command=self.square)
         button.grid(row=1, column=2, sticky=tk.NSEW)
 
     def sqrt(self):
-        self.current_expressions = str(eval(f"{self.current_expressions}**0.5"))
-        self.update_label()
+        try:
+            self.current_expressions = str(eval(f"{self.current_expressions}**0.5"))
+        except Exception as e:
+            self.current_expressions = ""
+        finally:
+            self.update_label()
 
     def create_sqrt_button(self):
-        button = tk.Button(self.buttons_frame, text="\u221ax", bg=OFF_WHITE, fg=LABEL_COLOR,
+        button = HoverButton(self.buttons_frame, text="\u221ax", bg=OFF_WHITE, fg=LABEL_COLOR,
                            font=DEFAULT_FONT_STYLE, borderwidth=0, command=self.sqrt)
         button.grid(row=1, column=3, sticky=tk.NSEW)
 
@@ -208,7 +243,7 @@ class Calculator:
             self.update_label()
 
     def create_equals_button(self):
-        button = tk.Button(self.buttons_frame, text="=", bg=LIGHT_BLUE, fg=LABEL_COLOR,
+        button = HoverButton(self.buttons_frame, text="=", bg=LIGHT_BLUE, fg=LABEL_COLOR,
                            font=DEFAULT_FONT_STYLE, borderwidth=0, command=self.evaluvate)
         button.grid(row=5, column=4, sticky=tk.NSEW)
 
