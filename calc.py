@@ -6,10 +6,10 @@ WHITE = "#FFFFFF"
 OFF_WHITE = "#F8FAFF"
 LIGHT_BLUE = "#CCEDFF"
 
-SMALL_FONT_STYLE = ('Arial', 16)
-LARGE_FONT_STYLE = ('Arial', 40, 'bold')
-DIGIT_FONT_STYLE = ('Arial', 24, 'bold')
-DEFAULT_FONT_STYLE = ('Arial', 20)
+SMALL_FONT_STYLE = ('Arial', 12)
+LARGE_FONT_STYLE = ('Arial', 30, 'bold')
+DIGIT_FONT_STYLE = ('Arial', 18, 'bold')
+DEFAULT_FONT_STYLE = ('Arial', 18)
 
 
 class HoverButton(tk.Button):
@@ -30,7 +30,7 @@ class HoverButton(tk.Button):
 class Calculator:
     def __init__(self):
         self.window = tk.Tk()
-        self.window.geometry('350x500')
+        self.window.geometry('325x505')
         self.window.resizable(0, 0)
         self.window.title("Calculator")
 
@@ -64,6 +64,11 @@ class Calculator:
         self.window.bind("<Return>", lambda event: self.evaluvate())
         self.window.bind("%", lambda event: self.percentage())
         self.window.bind("<BackSpace>", lambda event: self.backspace())
+        self.window.bind("<Escape>", lambda event: self.clear())
+        self.window.bind("<Delete>", lambda event: self.ce())
+        self.window.bind("q", lambda event: self.square())
+        self.window.bind("r", lambda event: self.reciprocal())
+        self.window.bind("@", lambda event: self.sqrt())
         for key in self.digits:
             self.window.bind(str(key), lambda event, digit=key: self.add_to_expression(digit))
 
@@ -123,7 +128,7 @@ class Calculator:
 
     def create_plus_minus_button(self):
         button = HoverButton(self.buttons_frame, text="\u00B1", bg=WHITE, fg=LABEL_COLOR,
-                           font=SMALL_FONT_STYLE, borderwidth=0, command=self.plus_minus)
+                           font=DEFAULT_FONT_STYLE, borderwidth=0, command=self.plus_minus)
         button.grid(row=5, column=1, sticky=tk.NSEW)
 
     def append_operator(self, operator):
@@ -159,7 +164,7 @@ class Calculator:
 
     def create_percentage_button(self):
         button = HoverButton(self.buttons_frame, text="\u0025", bg=OFF_WHITE, fg=LABEL_COLOR,
-                           font=SMALL_FONT_STYLE, borderwidth=0, command=self.percentage)
+                           font=DEFAULT_FONT_STYLE, borderwidth=0, command=self.percentage)
         button.grid(row=0, column=1, sticky=tk.NSEW)
 
     def ce(self):
@@ -168,7 +173,7 @@ class Calculator:
 
     def create_ce_button(self):
         button = HoverButton(self.buttons_frame, text="CE", bg=OFF_WHITE, fg=LABEL_COLOR,
-                           font=SMALL_FONT_STYLE, borderwidth=0, command=self.ce)
+                           font=DEFAULT_FONT_STYLE, borderwidth=0, command=self.ce)
         button.grid(row=0, column=2, sticky=tk.NSEW)
 
     def clear(self):
@@ -179,7 +184,7 @@ class Calculator:
 
     def create_clear_button(self):
         button = HoverButton(self.buttons_frame, text="C", bg=OFF_WHITE, fg=LABEL_COLOR,
-                           font=DEFAULT_FONT_STYLE, borderwidth=0, command=self.clear)
+                        font=DEFAULT_FONT_STYLE, borderwidth=0, command=self.clear)
         button.grid(row=0, column=3, sticky=tk.NSEW)
 
     def backspace(self):
@@ -193,7 +198,11 @@ class Calculator:
 
     def reciprocal(self):
         try:
+            expression = self.current_expressions
             self.current_expressions = str(eval(f"{self.current_expressions}**-1"))
+            if self.total_expressions == "":
+                self.total_expressions = "1/(" + expression + ")"
+                self.update_total_label()
         except Exception as e:
             self.current_expressions = ""
         finally:
@@ -206,7 +215,11 @@ class Calculator:
 
     def square(self):
         try:
+            expression = self.current_expressions
             self.current_expressions = str(eval(f"{self.current_expressions}**2"))
+            if self.total_expressions == "":
+                self.total_expressions = "sqr(" + expression + ")"
+                self.update_total_label()
         except Exception as e:
             self.current_expressions = ""
         finally:
@@ -219,7 +232,11 @@ class Calculator:
 
     def sqrt(self):
         try:
+            expression = self.current_expressions
             self.current_expressions = str(eval(f"{self.current_expressions}**0.5"))
+            if self.total_expressions == "":
+                self.total_expressions = "\u221a(" + expression + ")"
+                self.update_total_label()
         except Exception as e:
             self.current_expressions = ""
         finally:
@@ -248,13 +265,13 @@ class Calculator:
         button.grid(row=5, column=4, sticky=tk.NSEW)
 
     def update_total_label(self):
-        expression = self.total_expressions
+        expression = self.total_expressions[:30]
         for operator, symbol in self.operations.items():
             expression = expression.replace(operator, f"{symbol}")
         self.total_label.config(text=expression)
 
     def update_label(self):
-        self.label.config(text=self.current_expressions[:11])
+        self.label.config(text=self.current_expressions[:13])
 
     def run(self):
         self.window.mainloop()
